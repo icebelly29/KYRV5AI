@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ChatContainer from "@/components/chat/ChatContainer";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Maximize2, Minimize2 } from "lucide-react";
 
 interface ApiStatus {
   status: 'connected' | 'disconnected' | 'error';
@@ -11,6 +13,7 @@ interface ApiStatus {
 
 export default function ChatPage() {
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const { toast } = useToast();
 
   // Check API health status
@@ -39,9 +42,25 @@ export default function ChatPage() {
     }
   }, [sessionId]);
 
+  // Keyboard shortcuts for fullscreen
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'F11') {
+        event.preventDefault();
+        setIsFullscreen(!isFullscreen);
+      }
+      if (event.key === 'Escape' && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [isFullscreen]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--gradient-bg-start)] to-[var(--gradient-bg-end)] flex justify-center items-center p-2">
-      <div className="w-full max-w-6xl h-screen max-h-[95vh] bg-[var(--dark-gray)] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+    <div className={`min-h-screen bg-gradient-to-br from-[var(--gradient-bg-start)] to-[var(--gradient-bg-end)] flex justify-center items-center ${isFullscreen ? 'p-0' : 'p-2'}`}>
+      <div className={`w-full ${isFullscreen ? 'h-screen' : 'max-w-6xl h-screen max-h-[95vh]'} bg-[var(--dark-gray)] ${isFullscreen ? 'rounded-none' : 'rounded-3xl'} shadow-2xl flex flex-col overflow-hidden`}>
         
         {/* Header */}
         <div className="gradient-header px-6 py-4 flex-shrink-0">
@@ -50,7 +69,18 @@ export default function ChatPage() {
               <h1 className="text-3xl font-bold text-white mb-2">⚖️ Know Your Rights</h1>
               <p className="text-gray-300 text-sm">UK Legal Information AI Chatbot</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
+              {/* Fullscreen Toggle Button */}
+              <Button
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white hover:bg-opacity-20 p-2"
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </Button>
+              
               {/* API Status Indicator */}
               <div className="flex items-center space-x-2 bg-black bg-opacity-30 px-3 py-1 rounded-full">
                 <div 
@@ -78,7 +108,8 @@ export default function ChatPage() {
               <span>⚠️ This provides general legal information only. For specific legal advice, consult a qualified UK solicitor.</span>
             </div>
             <div className="flex items-center space-x-4">
-              <span>Powered by GPT-4 | UK Legal Database 2024</span>
+              <span>Powered by Groq Llama3-70B | UK Legal Database 2024</span>
+              <span className="text-gray-600">Press F11 for fullscreen</span>
             </div>
           </div>
         </div>
