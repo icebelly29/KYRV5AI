@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Know Your Rights - UK Legal AI Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background: #1a1a1a;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #031a6b 0%, #033860 100%);
+            padding: 15px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .header p {
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .categories {
+            background: #0f0f0f;
+            padding: 10px 15px;
+            flex-shrink: 0;
+        }
+
+        .categories h3 {
+            margin-bottom: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .category-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 6px;
+        }
+
+        .category-btn {
+            background: #004385;
+            color: #e0e0e0;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .category-btn:hover {
+            background: #05b2dc;
+            transform: translateY(-2px);
+            color: #fff;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px 20px;
+            background: #0a0a0a;
+            min-height: 0;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message.bot {
+            text-align: left;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 18px 25px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .citation {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 10px;
+            padding: 8px 12px;
+            background: #0a0a0a;
+            border-radius: 10px;
+            border-left: 3px solid #444;
+        }
+
+        .citation strong {
+            color: #ccc;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #004385 0%, #033860 100%);
+            color: #fff;
+            border: 1px solid #087ca7;
+        }
+
+        .message.bot .message-bubble {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border: 1px solid #444;
+        }
+
+        .input-container {
+            background: #0f0f0f;
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .input-field {
+            flex: 1;
+            background: #0a0a0a;
+            border: none;
+            border-radius: 25px;
+            padding: 15px 20px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            background: #1a1a1a;
+            box-shadow: 0 0 0 2px rgba(5, 178, 220, 0.3);
+        }
+
+        .send-btn {
+            background: #004385;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .send-btn:hover {
+            background: #05b2dc;
+            transform: translateY(-2px);
+        }
+
+        .disclaimer {
+            background: #0a0a0a;
+            color: #999;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-indicator {
+            display: none;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .typing-indicator .message-bubble {
+            background: #1a1a1a;
+            color: #bbb;
+            padding: 15px 20px;
+            border: 1px solid #444;
+        }
+
+        .typing-dots {
+            display: inline-block;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #bbb;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .clear-btn {
+            background: #1a1a1a;
+            color: #bbb;
+            border: 1px solid #333;
+            border-radius: 15px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn:hover {
+            background: #2a2a2a;
+            border-color: #444;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .category-buttons {
+                justify-content: center;
+            }
+            
+            .message-bubble {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚖️ Know Your Rights</h1>
+            <p>UK Legal Information AI Chatbot</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="categories">
+                <h3>Quick Topics:</h3>
+                <div class="category-buttons">
+                    <button class="category-btn" onclick="selectCategory('employment')">Employment Rights</button>
+                    <button class="category-btn" onclick="selectCategory('housing')">Housing & Tenancy</button>
+                    <button class="category-btn" onclick="selectCategory('consumer')">Consumer Rights</button>
+                    <button class="category-btn" onclick="selectCategory('police')">Police Encounters</button>
+                    <button class="category-btn" onclick="selectCategory('family')">Family Law</button>
+                    <button class="category-btn" onclick="selectCategory('debt')">Debt & Money</button>
+                    <button class="category-btn" onclick="selectCategory('benefits')">Benefits & Universal Credit</button>
+                    <button class="category-btn" onclick="selectCategory('health')">Healthcare Rights</button>
+                    <button class="category-btn" onclick="selectCategory('immigration')">Immigration</button>
+                    <button class="category-btn" onclick="selectCategory('criminal')">Criminal Law</button>
+                    <button class="category-btn" onclick="selectCategory('discrimination')">Discrimination</button>
+                    <button class="category-btn" onclick="selectCategory('data')">Data Protection</button>
+                </div>
+                <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-bubble">
+                        👋 Hello! I'm your UK Legal Rights AI assistant. I can help you understand your rights regarding employment, housing, consumer issues, police encounters, family law, debt, and more.
+                        <br><br>
+                        🔹 Click a topic button above for quick info<br>
+                        🔹 Or ask me any legal question about your rights<br>
+                        🔹 Try asking: "What are my rights if I'm fired?" or "Can my landlord evict me?"
+                    </div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-bubble">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-container">
+                <input type="text" class="input-field" id="userInput" placeholder="Ask about your rights... (e.g., 'employment rights', 'tenant rights')" maxlength="500">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            ⚠️ This provides general legal information only. For specific legal advice, consult a qualified UK solicitor.
+        </div>
+    </div>
+
+    <script>
+        // Enhanced legal knowledge base for UK law with citations
+        const legalKnowledge = {
+            employment: {
+                keywords: ['job', 'work', 'employer', 'fired', 'dismissed', 'wages', 'salary', 'overtime', 'holiday', 'sick leave', 'discrimination', 'harassment', 'redundancy', 'notice period', 'contract', 'tribunal', 'unfair dismissal', 'maternity', 'paternity', 'pension', 'p45', 'payslip', 'zero hours', 'agency worker', 'apprentice'],
+                responses: [
+                    {
+                        text: "🏢 **Employment Rights in the UK:**\n\n• **Written Contract**: Right to written terms within 2 months of starting\n• **Minimum Wage**: £10.42/hour for 23+ (April 2023 rates)\n• **Holiday Pay**: 5.6 weeks paid annual leave (including bank holidays)\n• **Notice Period**: 1 week minimum (1 month-2 years), 1 week per year (2-12 years)\n• **Discrimination Protection**: Age, disability, gender, race, religion, sexual orientation\n• **Flexible Working**: Right to request after 26 weeks employment\n• **TUPE Protection**: Transfer of rights when business changes hands",
+                        citations: "**Sources:** Employment Rights Act 1996, National Minimum Wage Act 1998, Equality Act 2010, Working Time Regulations 1998, ACAS Employment Law Guide 2023, Trade Union and Labour Relations Act 1992, Health and Safety at Work Act 1974"
+                    },
+                    {
+                        text: "⚖️ **Unfair Dismissal & Notice Rights:**\n\n• **Protection**: After 2 years continuous service, protection from unfair dismissal\n• **Fair Reasons**: Capability, conduct, redundancy, legal restriction, other substantial reason\n• **Notice Required**: 1 week (1 month-2 years), 1 week per year (2-12 years), max 12 weeks\n• **Redundancy Pay**: If role eliminated, statutory redundancy pay available\n• **Employment Tribunal**: 3 months minus 1 day to claim unfair dismissal\n• **Wrongful Dismissal**: Breach of contract, can claim notice pay",
+                        citations: "**Sources:** Employment Rights Act 1996 s.94-134, Employment Tribunals Act 1996, ACAS Code of Practice on Disciplinary Procedures 2015"
+                    },
+                    {
+                        text: "💰 **Wages & Working Time Rights:**\n\n• **National Minimum Wage**: Age 23+: £10.42, Age 21-22: £10.18, Age 18-20: £7.49, Under 18: £5.28, Apprentice: £5.28\n• **Working Time**: 48-hour maximum average week (can opt out in writing)\n• **Breaks**: 20 minutes uninterrupted if working 6+ hours\n• **Daily Rest**: 11 hours between working days\n• **Weekly Rest**: 24 hours per week (or 48 hours per fortnight)\n• **Overtime**: Not legally required unless in contract\n• **Pay Slips**: Legal right to itemised pay statement",
+                        citations: "**Sources:** National Minimum Wage Act 1998, Working Time Regulations 1998, Employment Rights Act 1996 s.13-27, GOV.UK Minimum Wage Rates 2023"
+                    }
+                ]
+            },
+            
+            housing: {
+                keywords: ['rent', 'landlord', 'tenant', 'eviction', 'deposit', 'repairs', 'housing', 'lease', 'council', 'homeless', 'neighbours', 'noise', 'section 21', 'section 8', 'assured shorthold', 'letting agent', 'gas safety', 'electrical safety', 'damp', 'mould', 'heating', 'tenancy agreement', 'inventory', 'right to rent'],
+                responses: [
+                    {
+                        text: "🏠 **Tenant Rights & Responsibilities:**\n\n• **Deposit Protection**: Landlord must protect deposit in approved scheme within 30 days\n• **Right to Quiet Enjoyment**: Freedom from harassment and unlawful entry\n• **Repairs**: Landlord responsible for structure, heating, water, gas/electrical safety\n• **Rent Increases**: For periodic tenancies, minimum 1 month notice required\n• **Eviction Protection**: Proper notice periods and court orders required\n• **Right to Rent**: Landlord must check immigration status before tenancy\n• **Energy Performance**: Right to EPC rating before viewing",
+                        citations: "**Sources:** Housing Act 1988, Landlord and Tenant Act 1985, Housing Act 2004, Tenancy Deposit Schemes, Consumer Rights Act 2015, Rent Act 1977, Housing and Planning Act 2016, Commonhold and Leasehold Reform Act 2002"
+                    },
+                    {
+                        text: "🚪 **Eviction Process & Notice Rights:**\n\n• **Section 21**: No-fault eviction, 2 months notice (periodic), must be served correctly\n• **Section 8**: Fault-based eviction for breach of tenancy terms\n• **Court Order**: Landlord cannot evict without court possession order\n• **Illegal Eviction**: Changing locks, harassment, cutting utilities is criminal offence\n• **Notice Periods**: Must comply with minimum statutory periods\n• **Renters Reform**: Section 21 being abolished (check current status)\n• **Local Authority**: Can prosecute illegal eviction, provide emergency accommodation",
+                        citations: "**Sources:** Housing Act 1988 s.21 & s.8, Protection from Eviction Act 1977, Housing and Planning Act 2016, Homes (Fitness for Human Habitation) Act 2018"
+                    },
+                    {
+                        text: "🔧 **Repairs & Habitability Rights:**\n\n• **Landlord Duties**: Structure, exterior, heating, hot water, gas/electrical installations\n• **Reporting Repairs**: Written notice triggers legal obligation to repair\n• **Disrepair Claims**: Can claim compensation for failure to repair\n• **Emergency Repairs**: Right to arrange emergency repairs and recover costs\n• **Damp & Mould**: Landlord must address if caused by structural issues\n• **Fit for Human Habitation**: Property must meet basic health and safety standards\n• **Local Authority**: Can serve improvement notices on landlords",
+                        citations: "**Sources:** Landlord and Tenant Act 1985 s.11, Housing Health and Safety Rating System, Homes (Fitness for Human Habitation) Act 2018, Environmental Protection Act 1990"
+                    }
+                ]
+            },
+
+            consumer: {
+                keywords: ['purchase', 'refund', 'warranty', 'guarantee', 'faulty', 'goods', 'services', 'shop', 'online', 'delivery', 'return', 'cancellation', 'consumer rights', 'sale of goods', 'distance selling', 'cooling off', 'contract', 'trader', 'business'],
+                responses: [
+                    {
+                        text: "🛒 **Consumer Rights when Buying Goods:**\n\n• **Satisfactory Quality**: Goods must be of acceptable standard for price paid\n• **Fit for Purpose**: Must do what they're supposed to do and what you asked for\n• **As Described**: Must match description, sample or demonstration model\n• **30-Day Right**: Short-term right to reject faulty goods for full refund\n• **Repair/Replace**: After 30 days, trader must repair or replace faulty goods\n• **Final Right to Reject**: If repair/replacement fails, right to refund (less deduction for use)\n• **Digital Content**: Same rights apply to software, apps, downloads",
+                        citations: "**Sources:** Consumer Rights Act 2015, Sale of Goods Act 1979 (repealed), Consumer Protection from Unfair Trading Regulations 2008, Consumer Credit Act 1974, Electronic Commerce Regulations 2002, Distance Selling Regulations 2000"
+                    },
+                    {
+                        text: "📱 **Online Shopping & Distance Selling Rights:**\n\n• **14-Day Cooling Off**: Right to cancel online/phone orders within 14 days\n• **Return Period**: Additional 14 days to return goods after cancellation\n• **Delivery**: Goods must arrive within agreed time or 30 days maximum\n• **Pre-Contract Information**: Trader must provide clear pricing, delivery info\n• **Automatic Renewals**: Must consent to subscription renewals\n• **Payment Protection**: Bank/card company liable for purchases £100-£30,000\n• **Unfair Terms**: Protection from unreasonable contract terms",
+                        citations: "**Sources:** Consumer Contracts Regulations 2013, Consumer Credit Act 1974 s.75, Consumer Rights Act 2015, Payment Services Regulations 2017"
+                    },
+                    {
+                        text: "🔧 **Services & Repair Rights:**\n\n• **Reasonable Skill**: Services must be carried out with reasonable care and skill\n• **Reasonable Price**: If no price agreed, must be reasonable\n• **Reasonable Time**: Work must be completed in reasonable time\n• **Information**: Right to clear information about service before agreeing\n• **Repeat Work**: Right to repeat performance if service not carried out properly\n• **Price Reduction**: Right to reduction if service cannot be repeated\n• **Cancellation**: Right to cancel and get money back if service cannot be fixed",
+                        citations: "**Sources:** Consumer Rights Act 2015 Part 1 Chapter 4, Supply of Goods and Services Act 1982, Unfair Contract Terms Act 1977"
+                    }
+                ]
+            },
+
+            police: {
+                keywords: ['police', 'arrest', 'stop', 'search', 'custody', 'interview', 'solicitor', 'rights', 'caution', 'bail', 'charge', 'detention', 'questioning', 'miranda', 'silence', 'warrant', 'complaint', 'misconduct'],
+                responses: [
+                    {
+                        text: "👮 **Your Rights When Stopped by Police:**\n\n• **Stop & Account**: Police can ask questions but you're not obliged to answer\n• **Stop & Search**: Must have reasonable suspicion, give name/station, reason, legal power\n• **What to Expect**: Officer should explain why, show warrant card, give receipt\n• **Your Rights**: Can ask for explanation, refuse search (unless specific powers), ask for copy of record\n• **Complaint Rights**: Can complain if treatment unfair or search unlawful\n• **Record Keeping**: Officer must make record of search with your details\n• **Strip Search**: Only at police station by same-sex officer with authorization",
+                        citations: "**Sources:** Police and Criminal Evidence Act 1984 (PACE), Code A - Stop and Search, Police Powers and Procedures England and Wales 2023"
+                    },
+                    {
+                        text: "🚓 **Arrest Rights & Police Custody:**\n\n• **When Arrested**: Must be told you're arrested, reason for arrest, cautioned\n• **Caution**: 'You do not have to say anything, but it may harm your defence if you do not mention when questioned something which you later rely on in court'\n• **Free Legal Advice**: Right to speak to solicitor privately before interview\n• **Phone Call**: Right to inform someone of your arrest\n• **Detention Limits**: 24 hours maximum (can be extended to 36 hours, or 96 for serious crimes)\n• **Interview Rights**: Can remain silent, have solicitor present, breaks for meals/rest\n• **Vulnerable Persons**: Additional protections for under 18s, mental health issues",
+                        citations: "**Sources:** Police and Criminal Evidence Act 1984, PACE Codes C & E, Criminal Justice and Public Order Act 1994, Legal Aid Agency"
+                    },
+                    {
+                        text: "⚖️ **Police Powers & Your Protections:**\n\n• **Entry Powers**: Usually need warrant, but exceptions for arrest, breach of peace, serious crimes\n• **Searching Property**: Can search premises after arrest if evidence may be found\n• **Seizure**: Can take items as evidence if lawfully on premises\n• **Body Samples**: DNA, fingerprints can be taken, destroyed if not charged/acquitted\n• **Police Complaints**: Independent Police Complaints Commission (IOPC) for serious matters\n• **Compensation**: Can claim for unlawful arrest, false imprisonment, assault\n• **Data Rights**: Right to see what police data held about you",
+                        citations: "**Sources:** Police and Criminal Evidence Act 1984, Human Rights Act 1998, Data Protection Act 2018, Police Reform Act 2002"
+                    }
+                ]
+            },
+
+            family: {
+                keywords: ['divorce', 'separation', 'custody', 'child support', 'maintenance', 'marriage', 'prenup', 'domestic violence', 'family court', 'contact', 'residence', 'adoption', 'guardianship', 'civil partnership', 'cohabitation'],
+                responses: [
+                    {
+                        text: "👨‍👩‍👧‍👦 **Children & Family Rights:**\n\n• **Child Arrangements**: Court orders for where children live and spend time\n• **Parental Responsibility**: Automatically for mothers, fathers if married or on birth certificate\n• **Child Maintenance**: Non-resident parent must financially support children\n• **Contact Rights**: Right to maintain relationship with both parents unless unsafe\n• **Child Protection**: Local authority duty to investigate welfare concerns\n• **Education**: Parents must ensure child receives suitable education\n• **Medical Consent**: Both parents with PR can consent to medical treatment",
+                        citations: "**Sources:** Children Act 1989, Child Maintenance Service, Family Procedure Rules 2010, Children and Families Act 2014"
+                    },
+                    {
+                        text: "💔 **Divorce & Separation Rights:**\n\n• **No-Fault Divorce**: Can divorce without proving fault (since April 2022)\n• **Grounds**: Irretrievable breakdown of marriage (only ground needed)\n• **Joint Application**: Can apply together or individually\n• **Financial Settlement**: Court can divide assets, order spousal maintenance\n• **Pension Sharing**: Retirement funds can be split between spouses\n• **Family Home**: Court considers housing needs, especially for children\n• **Legal Aid**: Available for domestic violence cases and some child matters",
+                        citations: "**Sources:** Divorce, Dissolution and Separation Act 2020, Matrimonial Causes Act 1973, Civil Partnership Act 2004, Legal Aid Agency"
+                    },
+                    {
+                        text: "🆘 **Domestic Violence Protection:**\n\n• **Non-Molestation Order**: Court order to stop harassment, violence, threats\n• **Occupation Order**: Can exclude abuser from family home\n• **Emergency Protection**: Police can arrest for breach of order\n• **Without Notice Applications**: Can get immediate protection without telling abuser\n• **Legal Aid**: Free legal help available for domestic violence victims\n• **Support Services**: National Domestic Violence Helpline, refuges, counselling\n• **Criminal Charges**: Police can prosecute even if victim doesn't want to",
+                        citations: "**Sources:** Family Law Act 1996, Domestic Violence, Crime and Victims Act 2004, Legal Aid Agency, Rights of Women Legal Advice"
+                    }
+                ]
+            },
+
+            debt: {
+                keywords: ['debt', 'money', 'credit', 'loan', 'mortgage', 'bankruptcy', 'bailiff', 'ccj', 'county court judgment', 'creditor', 'payment plan', 'interest', 'charges', 'overdraft', 'credit card', 'iva', 'dro'],
+                responses: [
+                    {
+                        text: "💳 **Debt Rights & Protections:**\n\n• **Fair Treatment**: Creditors must treat you fairly and consider your circumstances\n• **Payment Plans**: Right to propose affordable payment arrangements\n• **Interest Freezing**: Can request creditors freeze interest and charges\n• **Debt Advice**: Free advice from Citizens Advice, StepChange, National Debtline\n• **Priority Debts**: Council tax, mortgage, utilities, court fines take priority\n• **Harassment**: Creditors cannot use threatening or misleading tactics\n• **Statute Barred**: Most debts become unenforceable after 6 years",
+                        citations: "**Sources:** Consumer Credit Act 1974, Financial Conduct Authority Rules, Limitation Act 1980, Office of Fair Trading Debt Collection Guidance"
+                    },
+                    {
+                        text: "⚖️ **County Court Judgments & Enforcement:**\n\n• **CCJ Process**: Creditor must get court judgment before most enforcement action\n• **Defence Rights**: 14 days to respond to claim, can dispute or admit\n• **Payment Terms**: Can ask court for affordable payment plan\n• **Set Aside**: Can ask court to cancel CCJ if you didn't receive papers\n• **Satisfied CCJ**: Marked as paid on credit file, removed after 6 years\n• **Enforcement**: Bailiffs, attachment of earnings, charging order on property\n• **Protection**: Cannot take essential items, must follow strict procedures",
+                        citations: "**Sources:** Civil Procedure Rules, Tribunals Courts and Enforcement Act 2007, Taking Control of Goods Regulations 2013"
+                    },
+                    {
+                        text: "🔄 **Debt Solutions & Insolvency:**\n\n• **Debt Relief Order**: For debts under £30,000, assets under £2,000, low income\n• **Individual Voluntary Arrangement**: Formal agreement to pay part of debts\n• **Bankruptcy**: Last resort, clears most debts but affects credit rating\n• **Administration Order**: Court-supervised payment plan for multiple debts\n• **Debt Management Plan**: Informal arrangement with creditors\n• **Mental Health**: Extra protections if debt problems caused by mental health\n• **Breathing Space**: 60-day protection from creditor action while getting advice",
+                        citations: "**Sources:** Insolvency Act 1986, Debt Relief Orders, Enterprise Act 2002, Debt Respite Scheme 2021, Mental Health Crisis Moratorium"
+                    }
+                ]
+            },
+
+            benefits: {
+                keywords: ['benefits', 'universal credit', 'jobseekers', 'esa', 'pip', 'disability', 'housing benefit', 'council tax', 'child benefit', 'tax credits', 'pension credit', 'sanctions', 'assessment', 'appeal', 'mandatory reconsideration'],
+                responses: [
+                    {
+                        text: "💰 **Universal Credit Rights:**\n\n• **Assessment Period**: Monthly assessment, payment made monthly in arrears\n• **Work Allowance**: Can earn some money before benefits reduced\n• **Taper Rate**: Benefits reduced by 55p for every £1 earned over allowance\n• **Housing Costs**: Help with rent and some service charges\n• **Advance Payments**: Can get money while waiting for first payment\n• **Change of Circumstances**: Must report changes within one month\n• **Work Requirements**: May have to look for work, training, or work preparation",
+                        citations: "**Sources:** Welfare Reform Act 2012, Universal Credit Regulations 2013, DWP Guidance 2023, Social Security Administration Act 1992"
+                    },
+                    {
+                        text: "🏥 **Disability Benefits & Support:**\n\n• **Personal Independence Payment**: Help with daily living and mobility costs\n• **Employment Support Allowance**: If unable to work due to illness/disability\n• **Disability Living Allowance**: For children or existing claimants\n• **Attendance Allowance**: For over 65s needing personal care\n• **Access to Work**: Workplace support and equipment funding\n• **Blue Badge**: Parking concessions for mobility difficulties\n• **Assessments**: Face-to-face or telephone assessments by healthcare professionals",
+                        citations: "**Sources:** Welfare Reform Act 2012, Social Security Contributions and Benefits Act 1992, Equality Act 2010, PIP Assessment Guide"
+                    },
+                    {
+                        text: "📝 **Benefits Appeals & Challenges:**\n\n• **Mandatory Reconsideration**: Must request before appealing, one month time limit\n• **Tribunal Appeal**: Independent appeal to HM Courts & Tribunals Service\n• **Representation**: Can have representative, friend or family member help\n• **Evidence**: Can submit additional medical evidence, written statements\n• **Hearing Rights**: Right to oral hearing, can request paper-only decision\n• **Success Rate**: Around 70% of PIP appeals succeed at tribunal\n• **Time Limits**: Usually one month from decision to request reconsideration",
+                        citations: "**Sources:** Tribunals, Courts and Enforcement Act 2007, Social Security Act 1998, Tribunal Procedure Rules, Ministry of Justice Statistics"
+                    }
+                ]
+            },
+
+            health: {
+                keywords: ['nhs', 'healthcare', 'medical', 'treatment', 'prescription', 'hospital', 'gp', 'doctor', 'consent', 'mental health', 'waiting times', 'free healthcare', 'patient rights', 'medical records', 'complaints', 'negligence'],
+                responses: [
+                    {
+                        text: "🏥 **NHS Rights & Entitlements:**\n\n• **Free Healthcare**: Free at point of use for UK residents and some visitors\n• **GP Registration**: Right to register with local GP practice\n• **Emergency Treatment**: A&E treatment free for everyone regardless of status\n• **Waiting Times**: Maximum 18 weeks from referral to treatment\n• **Prescription Charges**: Free in Scotland, Wales, NI; charges in England with exemptions\n• **Patient Choice**: Right to choose hospital for non-emergency treatment\n• **Second Opinion**: Can request referral to another specialist",
+                        citations: "**Sources:** NHS Act 2006, NHS Constitution for England, Health and Social Care Act 2012, NHS (Charges to Overseas Visitors) Regulations 2015"
+                    },
+                    {
+                        text: "🧠 **Mental Health Rights:**\n\n• **Mental Health Act**: Powers to detain and treat people with mental illness\n• **Voluntary Treatment**: Right to refuse treatment unless sectioned\n• **Advocacy**: Independent Mental Health Advocates for detained patients\n• **Nearest Relative**: Legal rights to information and involvement in care\n• **Tribunal**: Right to appeal detention to Mental Health Tribunal\n• **Community Treatment**: Conditional discharge with required treatment\n• **Capacity**: Mental Capacity Act protects those lacking decision-making capacity",
+                        citations: "**Sources:** Mental Health Act 1983 (amended 2007), Mental Capacity Act 2005, Care Act 2014, Human Rights Act 1998"
+                    },
+                    {
+                        text: "📋 **Patient Rights & Complaints:**\n\n• **Informed Consent**: Right to information about treatment risks and benefits\n• **Medical Records**: Right to see your medical records and request corrections\n• **Confidentiality**: Healthcare professionals must keep information confidential\n• **Complaints**: Local NHS complaints procedure, then Parliamentary Ombudsman\n• **Compensation**: Can claim for medical negligence through legal action\n• **Data Protection**: Control over how health data is used and shared\n• **Advanced Directives**: Right to specify treatment preferences in advance",
+                        citations: "**Sources:** Data Protection Act 2018, NHS Complaints Procedure, General Medical Council Guidance, Montgomery v Lanarkshire 2015"
+                    }
+                ]
+            },
+
+            immigration: {
+                keywords: ['visa', 'immigration', 'asylum', 'refugee', 'deportation', 'citizenship', 'settlement', 'leave to remain', 'points system', 'spouse visa', 'student visa', 'work permit', 'british passport', 'indefinite leave', 'home office'],
+                responses: [
+                    {
+                        text: "🛂 **Immigration Status & Rights:**\n\n• **Right to Work**: Depends on visa conditions, check BRP or visa sticker\n• **Public Funds**: Most visas have 'no recourse to public funds' condition\n• **Healthcare**: Some entitled to free NHS, others pay immigration health surcharge\n• **Education**: Children entitled to education regardless of immigration status\n• **Police Registration**: Some nationalities must register with police\n• **Biometric Residence Permit**: Proves immigration status in the UK\n• **Settlement**: After 5-10 years can apply for indefinite leave to remain",
+                        citations: "**Sources:** Immigration Act 2014, Immigration Rules, NHS (Charges to Overseas Visitors) Regulations 2015, Education Act 1996"
+                    },
+                    {
+                        text: "⚖️ **Immigration Appeals & Rights:**\n\n• **Right of Appeal**: Limited appeal rights, depends on decision type\n• **Administrative Review**: Can request review of some refusal decisions\n• **Human Rights**: Article 8 (family life) and Article 3 (torture) protections\n• **Legal Representation**: Right to legal advice and representation\n• **Bail**: Can apply for bail if detained\n• **Judicial Review**: Challenge unlawful Home Office decisions in High Court\n• **Time Limits**: Usually 14-28 days to appeal or apply for review",
+                        citations: "**Sources:** Immigration Act 2014, Nationality Immigration and Asylum Act 2002, Human Rights Act 1998, Tribunal Procedure Rules"
+                    },
+                    {
+                        text: "🏠 **Asylum & Refugee Rights:**\n\n• **Asylum Claim**: Must claim within reasonable time, usually at port of entry\n• **Screening Interview**: Initial interview about identity and journey\n• **Substantive Interview**: Detailed interview about asylum claim reasons\n• **Support**: Accommodation and financial support while claim processed\n• **Legal Aid**: Free legal advice available for asylum cases\n• **Fresh Claims**: Can make new claim if significant new evidence\n• **Appeals**: Right to appeal refusal to First-tier Tribunal",
+                        citations: "**Sources:** Immigration and Asylum Act 1999, Refugee Convention 1951, Asylum Support Regulations 2000, Legal Aid Agency"
+                    }
+                ]
+            },
+
+            criminal: {
+                keywords: ['crime', 'criminal', 'court', 'magistrates', 'crown court', 'sentence', 'fine', 'prison', 'community service', 'caution', 'conviction', 'criminal record', 'disclosure', 'rehabilitation', 'probation', 'parole'],
+                responses: [
+                    {
+                        text: "⚖️ **Criminal Court Process & Rights:**\n\n• **First Hearing**: Either guilty or not guilty plea at magistrates court\n• **Legal Representation**: Right to lawyer, legal aid available if can't afford\n• **Bail**: Presumption of bail unless risk of not attending or committing offences\n• **Evidence Disclosure**: Prosecution must share evidence with defence\n• **Fair Trial**: Right to fair and public hearing within reasonable time\n• **Interpreter**: Right to interpreter if don't speak English\n• **Appeal Rights**: Can appeal conviction or sentence to higher court",
+                        citations: "**Sources:** Criminal Procedure Rules, Bail Act 1976, Legal Aid Agency, Human Rights Act 1998, Criminal Justice Act 2003"
+                    },
+                    {
+                        text: "📋 **Criminal Records & Disclosure:**\n\n• **DBS Checks**: Criminal records disclosed for certain jobs and activities\n• **Spent Convictions**: After rehabilitation period, convictions become 'spent'\n• **Filtering**: Some old cautions and convictions filtered from standard DBS\n• **Enhanced Checks**: Additional local police information may be disclosed\n• **Right to Challenge**: Can challenge inaccurate or unfair disclosure\n• **Rehabilitation Periods**: Vary by sentence length and age at conviction\n• **Employer Rights**: Limited circumstances when can ask about spent convictions",
+                        citations: "**Sources:** Rehabilitation of Offenders Act 1974, Police Act 1997, DBS Filtering Guide, Protection of Freedoms Act 2012"
+                    },
+                    {
+                        text: "🏛️ **Sentencing & Post-Conviction Rights:**\n\n• **Sentencing Guidelines**: Courts follow guidelines for consistent sentencing\n• **Victim Impact**: Victim statements considered before sentencing\n• **Compensation**: Court can order compensation to victims\n• **Community Sentences**: Alternatives to prison like community service\n• **Prison Rights**: Basic rights including healthcare, education, contact with family\n• **Parole**: Automatic release at halfway point for some sentences\n• **Licence Conditions**: Supervised release with conditions after prison",
+                        citations: "**Sources:** Criminal Justice Act 2003, Sentencing Guidelines Council, Prison Rules 1999, Criminal Justice and Immigration Act 2008"
+                    }
+                ]
+            },
+
+            discrimination: {
+                keywords: ['discrimination', 'equality', 'harassment', 'disability', 'race', 'gender', 'age', 'religion', 'sexual orientation', 'pregnancy', 'equal pay', 'reasonable adjustments', 'protected characteristics', 'victimisation', 'direct', 'indirect'],
+                responses: [
+                    {
+                        text: "⚖️ **Protected Characteristics & Equality Rights:**\n\n• **Protected Characteristics**: Age, disability, gender reassignment, marriage/civil partnership, pregnancy/maternity, race, religion/belief, sex, sexual orientation\n• **Direct Discrimination**: Less favourable treatment because of protected characteristic\n• **Indirect Discrimination**: Neutral policy that disadvantages particular group\n• **Harassment**: Unwanted conduct that violates dignity or creates hostile environment\n• **Victimisation**: Poor treatment for making or supporting discrimination complaint\n• **Reasonable Adjustments**: Duty to make adjustments for disabled people\n• **Equal Pay**: Right to equal pay for equal work regardless of gender",
+                        citations: "**Sources:** Equality Act 2010, EHRC Employment Code of Practice, Equal Pay Act 1970 (repealed), ACAS Guidance on Discrimination"
+                    },
+                    {
+                        text: "🏢 **Workplace Discrimination Rights:**\n\n• **Employment Tribunal**: Can claim discrimination within 3 months minus 1 day\n• **ACAS Early Conciliation**: Must contact ACAS before making tribunal claim\n• **Compensation**: No cap on discrimination compensation awards\n• **Burden of Proof**: Shifts to employer once facts established suggesting discrimination\n• **Pregnancy Rights**: Protection from dismissal, discrimination during pregnancy\n• **Disability Rights**: Reasonable adjustments, protection from discrimination\n• **Whistleblowing**: Protection from retaliation for reporting discrimination",
+                        citations: "**Sources:** Equality Act 2010, Employment Rights Act 1996, Employment Tribunals Act 1996, Public Interest Disclosure Act 1998"
+                    },
+                    {
+                        text: "🏪 **Discrimination in Services & Public Life:**\n\n• **Service Provision**: Businesses cannot discriminate in providing goods/services\n• **Public Sector Duty**: Public bodies must promote equality and eliminate discrimination\n• **Education**: Schools cannot discriminate against pupils or prospective pupils\n• **Housing**: Landlords cannot discriminate in letting or managing property\n• **Clubs & Associations**: Private clubs with 25+ members cannot discriminate\n• **Disability Access**: Duty to make reasonable adjustments for disabled customers\n• **County Court**: Can claim discrimination in services through county court",
+                        citations: "**Sources:** Equality Act 2010 Parts 3-7, Disability Discrimination Act 1995 (repealed), EHRC Services Code of Practice"
+                    }
+                ]
+            },
+
+            data: {
+                keywords: ['data protection', 'privacy', 'gdpr', 'personal data', 'data breach', 'consent', 'data controller', 'data processor', 'ico', 'right to be forgotten', 'data portability', 'surveillance', 'cookies', 'privacy policy'],
+                responses: [
+                    {
+                        text: "🔒 **Your Data Protection Rights:**\n\n• **Right to be Informed**: Clear information about data collection and use\n• **Right of Access**: Request copy of personal data held about you\n• **Right to Rectification**: Correct inaccurate or incomplete personal data\n• **Right to Erasure**: 'Right to be forgotten' - request deletion of data\n• **Right to Restrict Processing**: Limit how your data is used\n• **Right to Data Portability**: Move data between services\n• **Right to Object**: Object to processing including direct marketing\n• **Rights around Automated Decision Making**: Including profiling",
+                        citations: "**Sources:** Data Protection Act 2018, UK GDPR, Information Commissioner's Office Guidance, Privacy and Electronic Communications Regulations"
+                    },
+                    {
+                        text: "🛡️ **Data Protection Principles & Consent:**\n\n• **Lawful Basis**: Must have valid reason for processing personal data\n• **Data Minimisation**: Only collect data that's necessary\n• **Purpose Limitation**: Use data only for stated purposes\n• **Accuracy**: Keep data accurate and up to date\n• **Storage Limitation**: Don't keep data longer than necessary\n• **Security**: Protect data with appropriate security measures\n• **Consent**: Must be freely given, specific, informed and unambiguous\n• **Withdraw Consent**: Right to withdraw consent at any time",
+                        citations: "**Sources:** UK GDPR Articles 5-7, Data Protection Act 2018, ICO Data Protection Principles Guide"
+                    },
+                    {
+                        text: "📱 **Online Privacy & Digital Rights:**\n\n• **Cookie Consent**: Websites must get consent for non-essential cookies\n• **Privacy Policies**: Must be clear about data collection and use\n• **Data Breaches**: Right to be notified if breach affects you\n• **Children's Data**: Extra protections for under-13s online\n• **Direct Marketing**: Right to opt out of marketing communications\n• **CCTV**: Notice required for surveillance cameras\n• **Complaints**: Can complain to ICO about data protection violations\n• **Compensation**: Can claim compensation for data protection breaches",
+                        citations: "**Sources:** Privacy and Electronic Communications Regulations, Data Protection Act 2018, ICO Direct Marketing Guide, Age Appropriate Design Code"
+                    }
+                ]
+            }
+        };
+
+        // Chat functionality and database integration
+        let conversationHistory = [];
+        let currentUser = null;
+        let currentConversation = null;
+
+        // Initialize user session
+        async function initializeSession() {
+            try {
+                const response = await fetch('/api/session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    currentUser = await response.json();
+                    console.log('User session initialized:', currentUser.sessionId);
+                }
+            } catch (error) {
+                console.error('Failed to initialize session:', error);
+            }
+        }
+
+        // Create new conversation
+        async function createConversation(title) {
+            if (!currentUser) return null;
+            
+            try {
+                const response = await fetch('/api/conversations', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentUser.sessionId,
+                        title: title || 'Legal Question'
+                    })
+                });
+                
+                if (response.ok) {
+                    currentConversation = await response.json();
+                    return currentConversation;
+                }
+            } catch (error) {
+                console.error('Failed to create conversation:', error);
+            }
+            
+            return null;
+        }
+
+        // Save message to database
+        async function saveMessage(content, isUser, category = null, citations = null) {
+            if (!currentConversation) {
+                await createConversation();
+            }
+            
+            if (!currentConversation) return;
+            
+            try {
+                const response = await fetch(`/api/conversations/${currentConversation.id}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content,
+                        isUser,
+                        category,
+                        citations
+                    })
+                });
+                
+                if (response.ok) {
+                    const message = await response.json();
+                    return message;
+                }
+            } catch (error) {
+                console.error('Failed to save message:', error);
+            }
+        }
+
+        // Track legal query for analytics
+        async function trackQuery(query, category) {
+            if (!currentUser) return;
+            
+            try {
+                await fetch('/api/queries', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sessionId: currentUser.sessionId,
+                        query,
+                        category,
+                        responseProvided: true
+                    })
+                });
+            } catch (error) {
+                console.error('Failed to track query:', error);
+            }
+        }
+
+        // Function to remove markdown formatting
+        function stripMarkdown(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove **bold**
+                .replace(/\*(.*?)\*/g, '$1')      // Remove *italic*
+                .replace(/__(.*?)__/g, '$1')      // Remove __bold__
+                .replace(/_(.*?)_/g, '$1')        // Remove _italic_
+                .replace(/`(.*?)`/g, '$1')        // Remove `code`
+                .replace(/#{1,6}\s?(.*)/g, '$1')  // Remove # headers
+                .replace(/\[(.*?)\]\(.*?\)/g, '$1'); // Remove [text](link)
+        }
+
+        function addMessage(content, isUser = false, citations = null) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            // Strip markdown formatting for bot messages
+            const cleanContent = isUser ? content : stripMarkdown(content);
+            let messageHTML = `<div class="message-bubble">${cleanContent.replace(/\n/g, '<br>')}</div>`;
+            
+            if (citations) {
+                // Also strip markdown from citations
+                const cleanCitations = stripMarkdown(citations);
+                messageHTML += `<div class="citation">${cleanCitations}</div>`;
+            }
+            
+            messageDiv.innerHTML = messageHTML;
+            chatMessages.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function showTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'block';
+            
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'none';
+        }
+
+        function findBestResponse(userInput) {
+            const input = userInput.toLowerCase();
+            let bestMatch = null;
+            let bestScore = 0;
+
+            // Check each category
+            for (const [category, data] of Object.entries(legalKnowledge)) {
+                let score = 0;
+                
+                // Check keyword matches
+                for (const keyword of data.keywords) {
+                    if (input.includes(keyword.toLowerCase())) {
+                        score += keyword.length; // Longer keywords get higher weight
+                    }
+                }
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMatch = {
+                        category: category,
+                        responses: data.responses
+                    };
+                }
+            }
+
+            // If no good match, return general help
+            if (bestScore === 0) {
+                return {
+                    text: "🤔 I'd be happy to help with your legal question! I can provide information about:\n\n• Employment rights and workplace issues\n• Housing and tenancy matters\n• Consumer rights and purchases\n• Police encounters and criminal law\n• Family law and children's rights\n• Debt and financial problems\n• Benefits and Universal Credit\n• Healthcare and NHS rights\n• Immigration and asylum\n• Discrimination and equality\n• Data protection and privacy\n\nCould you please be more specific about which area you'd like help with? For example, you could ask 'What are my employment rights?' or 'Can my landlord evict me?'",
+                    citations: null
+                };
+            }
+
+            // Return a random response from the best matching category
+            const randomResponse = bestMatch.responses[Math.floor(Math.random() * bestMatch.responses.length)];
+            return randomResponse;
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, true);
+            
+            // Save user message to database
+            await saveMessage(message, true);
+            
+            conversationHistory.push({user: message, timestamp: new Date()});
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate processing delay
+            setTimeout(async () => {
+                hideTypingIndicator();
+                
+                // Get bot response
+                const response = findBestResponse(message);
+                const category = detectCategory(message);
+                
+                addMessage(response.text, false, response.citations);
+                
+                // Save bot response to database
+                await saveMessage(response.text, false, category, response.citations);
+                
+                // Track query for analytics
+                if (category) {
+                    await trackQuery(message, category);
+                }
+                
+                conversationHistory.push({
+                    bot: response.text, 
+                    citations: response.citations,
+                    timestamp: new Date()
+                });
+            }, 1000 + Math.random() * 1000); // Random delay 1-2 seconds
+        }
+
+        function selectCategory(category) {
+            if (legalKnowledge[category]) {
+                const data = legalKnowledge[category];
+                const response = data.responses[0]; // Use first response for categories
+                
+                showTypingIndicator();
+                
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addMessage(response.text, false, response.citations);
+                    
+                    conversationHistory.push({
+                        category: category,
+                        bot: response.text,
+                        citations: response.citations,
+                        timestamp: new Date()
+                    });
+                }, 800);
+            }
+        }
+
+        function clearChat() {
+            const chatMessages = document.getElementById('chatMessages');
+            
+            // Keep only the initial welcome message
+            const welcomeMessage = chatMessages.children[0];
+            chatMessages.innerHTML = '';
+            chatMessages.appendChild(welcomeMessage);
+            
+            // Clear conversation history
+            conversationHistory = [];
+        }
+
+        // Event listeners
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Search functionality for keyword matching
+        function searchKnowledgeBase(query) {
+            const results = [];
+            const searchTerm = query.toLowerCase();
+            
+            for (const [category, data] of Object.entries(legalKnowledge)) {
+                for (const response of data.responses) {
+                    if (response.text.toLowerCase().includes(searchTerm)) {
+                        results.push({
+                            category: category,
+                            response: response,
+                            relevance: (response.text.toLowerCase().match(new RegExp(searchTerm, 'g')) || []).length
+                        });
+                    }
+                }
+            }
+            
+            return results.sort((a, b) => b.relevance - a.relevance);
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error('Application error:', e.error);
+            addMessage("⚠️ I'm experiencing some technical difficulties. Please try refreshing the page or asking your question again.", false);
+        });
+
+        // Auto-focus input field on page load and initialize session
+        window.addEventListener('load', function() {
+            document.getElementById('userInput').focus();
+            initializeSession();
+        });
+    </script>
+</body>
+</html>
