@@ -7,14 +7,17 @@ import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Health check for OpenAI API
+  // Health check for AI API
   app.get("/api/health", async (req, res) => {
     try {
       const isHealthy = await healthCheck();
+      const apiKey = process.env.OPENAI_API_KEY || "";
+      const serviceName = apiKey.startsWith("gsk_") ? "Groq Llama3-70B" : "OpenAI GPT-4";
+      
       res.json({ 
         status: isHealthy ? 'connected' : 'disconnected',
         timestamp: Date.now(),
-        service: 'OpenAI GPT-4'
+        service: serviceName
       });
     } catch (error) {
       res.status(503).json({ 

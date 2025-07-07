@@ -1,13 +1,18 @@
 import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key"
 });
 
-// Alternative free AI service configuration
-const HUGGING_FACE_API = "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large";
-const TOGETHER_AI_API = "https://api.together.xyz/inference";
+// Groq integration - much faster and free!
+const groq = new Groq({
+  apiKey: process.env.OPENAI_API_KEY || process.env.GROQ_API_KEY
+});
+
+// Check if we're using Groq (API key starts with gsk_)
+const isGroqKey = (process.env.OPENAI_API_KEY || "").startsWith("gsk_");
 
 export interface LegalChatRequest {
   message: string;
@@ -92,33 +97,53 @@ Remember: Always maintain professional tone and provide comprehensive, accurate 
 
 export async function generateLegalResponse(request: LegalChatRequest): Promise<LegalChatResponse> {
   try {
-    // Try free alternatives first if OpenAI fails
     const category = request.category || detectCategory(request.message);
+    const systemPrompt = buildSystemPrompt(category);
     
-    // Try OpenAI first
-    try {
-      const systemPrompt = buildSystemPrompt(category);
-      
-      // Build conversation history for context
-      const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-        { role: 'system', content: systemPrompt }
-      ];
-      
-      // Add recent context (last 10 messages)
-      const recentContext = request.context.slice(-10);
-      for (const contextMessage of recentContext) {
-        messages.push({
-          role: contextMessage.role,
-          content: contextMessage.content
-        });
-      }
-      
-      // Add current user message
+    // Build conversation history for context
+    const messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+      { role: 'system', content: systemPrompt }
+    ];
+    
+    // Add recent context (last 10 messages)
+    const recentContext = request.context.slice(-10);
+    for (const contextMessage of recentContext) {
       messages.push({
-        role: 'user',
-        content: request.message
+        role: contextMessage.role,
+        content: contextMessage.content
+      });
+    }
+    
+    // Add current user message
+    messages.push({
+      role: 'user',
+      content: request.message
+    });
+
+    // Use Groq if we have a Groq key, otherwise try OpenAI
+    if (isGroqKey) {
+      console.log('Using Groq API for fast legal response...');
+      
+      const response = await groq.chat.completions.create({
+        model: "llama3-70b-8192", // Groq's fastest and most capable model
+        messages,
+        max_tokens: 1500,
+        temperature: 0.1,
       });
 
+      const responseContent = response.choices[0].message.content || "I apologize, but I couldn't generate a response. Please try again.";
+      
+      const responseId = `GR-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+      const citations = generateCitations(category, responseContent);
+
+      return {
+        response: responseContent,
+        citations,
+        responseId,
+        category
+      };
+    } else {
+      // Use OpenAI
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages,
@@ -139,34 +164,12 @@ export async function generateLegalResponse(request: LegalChatRequest): Promise<
         responseId,
         category
       };
-
-    } catch (openaiError) {
-      console.log('OpenAI failed, trying free alternative...');
-      
-      // Try free Groq API as fallback
-      try {
-        const groqResponse = await tryGroqAPI(request.message, category);
-        if (groqResponse) {
-          return groqResponse;
-        }
-      } catch (groqError) {
-        console.log('Groq failed, using enhanced fallback...');
-      }
-      
-      // If all else fails, use enhanced fallback
-      const fallbackResponse = generateFallbackResponse(category, request.message);
-      
-      return {
-        response: fallbackResponse,
-        citations: generateCitations(category, fallbackResponse),
-        responseId: `DEMO-${Date.now()}`,
-        category
-      };
     }
 
   } catch (error) {
-    console.error('All AI services failed:', error);
+    console.error('AI API Error:', error);
     
+    // Enhanced fallback with specific guidance based on category
     const category = request.category || detectCategory(request.message);
     const fallbackResponse = generateFallbackResponse(category, request.message);
     
@@ -177,13 +180,6 @@ export async function generateLegalResponse(request: LegalChatRequest): Promise<
       category
     };
   }
-}
-
-// Free Groq API integration (no signup required for basic usage)
-async function tryGroqAPI(message: string, category: string): Promise<LegalChatResponse | null> {
-  // This would require a Groq API key, but they offer generous free tiers
-  // For now, return null to use fallback
-  return null;
 }
 
 function generateFallbackResponse(category: string, message: string): string {
@@ -305,14 +301,25 @@ function generateCitations(category: string, response: string): string {
 
 export async function healthCheck(): Promise<boolean> {
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: 'user', content: 'Hello' }],
-      max_tokens: 5
-    });
-    return response.choices.length > 0;
+    if (isGroqKey) {
+      // Health check for Groq
+      const response = await groq.chat.completions.create({
+        model: "llama3-70b-8192",
+        messages: [{ role: 'user', content: 'Hello' }],
+        max_tokens: 5
+      });
+      return response.choices.length > 0;
+    } else {
+      // Health check for OpenAI
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: 'user', content: 'Hello' }],
+        max_tokens: 5
+      });
+      return response.choices.length > 0;
+    }
   } catch (error) {
-    console.error('OpenAI Health Check Failed:', error);
+    console.error('AI API Health Check Failed:', error);
     return false;
   }
 }
