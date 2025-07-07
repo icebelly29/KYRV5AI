@@ -138,14 +138,120 @@ export async function generateLegalResponse(request: LegalChatRequest): Promise<
   } catch (error) {
     console.error('OpenAI API Error:', error);
     
-    // Fallback response
+    // Enhanced fallback with specific guidance based on category
+    const category = request.category || detectCategory(request.message);
+    const fallbackResponse = generateFallbackResponse(category, request.message);
+    
     return {
-      response: "I apologize, but I'm experiencing technical difficulties with the AI service. Please try again in a moment, or contact support if the issue persists. For immediate legal guidance, please consult Citizens Advice or a qualified UK solicitor.",
-      citations: "Fallback response - API connection failed",
-      responseId: `ERR-${Date.now()}`,
-      category: request.category || 'general'
+      response: fallbackResponse,
+      citations: generateCitations(category, fallbackResponse),
+      responseId: `DEMO-${Date.now()}`,
+      category
     };
   }
+}
+
+function generateFallbackResponse(category: string, message: string): string {
+  const fallbackResponses = {
+    employment: `**Employment Rights Information**
+
+Based on your question about "${message.substring(0, 50)}...", here's some key UK employment law information:
+
+**Your Key Rights:**
+• **Contract Terms**: You're entitled to written terms within 2 months of starting work
+• **Minimum Wage**: Currently £10.42/hour for those 23+ (April 2023 rates)
+• **Notice Periods**: Minimum 1 week (1 month-2 years service), 1 week per year thereafter
+• **Unfair Dismissal**: Protected after 2 years continuous service
+• **Discrimination**: Protected against discrimination based on age, disability, gender, race, religion, sexual orientation
+
+**Next Steps:**
+1. Check your written contract terms
+2. Keep records of all communications with your employer
+3. Consider contacting ACAS (Advisory, Conciliation and Arbitration Service) for free guidance
+4. If needed, consult with an employment solicitor
+
+**Important**: This is general information only. For specific legal advice about your situation, please consult a qualified UK employment solicitor.`,
+
+    housing: `**Housing & Tenancy Rights Information**
+
+Regarding your housing question "${message.substring(0, 50)}...", here are your key UK tenant rights:
+
+**Your Rights as a Tenant:**
+• **Deposit Protection**: Landlords must protect your deposit in a government-approved scheme
+• **Repairs**: Landlords must maintain the property structure and utilities
+• **Notice**: Landlords must give proper notice before entering (usually 24 hours)
+• **Eviction**: Specific legal procedures must be followed for eviction
+• **Safe Housing**: Property must meet safety and habitability standards
+
+**Common Protections:**
+• Section 21 notices require 2 months' notice (for assured shorthold tenancies)
+• Section 8 notices require specific grounds and procedures
+• Rent increases must follow proper procedures
+• Harassment by landlords is illegal
+
+**Next Steps:**
+1. Check your tenancy agreement type
+2. Document any issues with photos and written records
+3. Contact Shelter (housing charity) for free advice
+4. Consider local council housing department for serious issues
+
+**Important**: This is general information only. For specific legal advice about your housing situation, please consult a qualified UK housing solicitor.`,
+
+    consumer: `**Consumer Rights Information**
+
+About your consumer rights question "${message.substring(0, 50)}...", here's what UK law protects:
+
+**Your Consumer Rights:**
+• **Goods Must Be**: As described, fit for purpose, and of satisfactory quality
+• **Refund Rights**: 30 days for faulty goods, up to 6 months for other issues
+• **Repair/Replace**: Right to repair or replacement before refund
+• **Services**: Must be carried out with reasonable care and skill
+• **Distance Selling**: 14-day cooling-off period for online/phone purchases
+
+**Key Laws:**
+• Consumer Rights Act 2015
+• Consumer Contracts Regulations 2013
+• Sale of Goods Act 1979 (still applies in some cases)
+
+**Next Steps:**
+1. Contact the trader first to resolve the issue
+2. Keep all receipts and documentation
+3. Contact Citizens Advice for free guidance
+4. Consider Alternative Dispute Resolution (ADR)
+5. Small claims court for unresolved disputes
+
+**Important**: This is general information only. For specific legal advice about your consumer issue, please consult a qualified UK consumer rights solicitor.`,
+
+    general: `**UK Legal Information**
+
+Thank you for your question about "${message.substring(0, 50)}...". While I'm currently unable to provide AI-powered responses due to API limitations, here's some general guidance:
+
+**Key UK Legal Resources:**
+• **Citizens Advice**: Free, confidential advice on legal issues
+• **Law Society**: Find qualified solicitors in your area
+• **Gov.uk**: Official government legal guidance
+• **Legal Aid**: May be available for certain cases
+
+**Common Legal Areas:**
+• Employment law and workplace rights
+• Housing and tenancy issues
+• Consumer rights and purchases
+• Family law and relationships
+• Immigration and nationality
+• Benefits and social security
+
+**Next Steps:**
+1. Contact Citizens Advice for free initial guidance
+2. Check if you qualify for legal aid
+3. Consider consulting with a qualified solicitor
+4. Keep detailed records of your situation
+
+**Important**: This is general information only. For specific legal advice about your situation, please consult a qualified UK solicitor.
+
+*Note: The AI service will provide more detailed, context-aware responses once the API quota is restored.*`
+  };
+
+  return fallbackResponses[category as keyof typeof fallbackResponses] || fallbackResponses.general;
 }
 
 function generateCitations(category: string, response: string): string {

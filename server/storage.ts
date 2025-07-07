@@ -59,6 +59,8 @@ export class MemStorage implements IStorage {
     const conversation: Conversation = {
       ...insertConversation,
       id,
+      messages: insertConversation.messages || [],
+      context: insertConversation.context || [],
       category: insertConversation.category || null,
       createdAt: now,
       updatedAt: now,
