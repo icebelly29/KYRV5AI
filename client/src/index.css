@@ -83,11 +83,32 @@
   .category-btn {
     background: var(--legal-blue);
     transition: all 0.3s ease;
+    min-width: 0;
+    word-break: break-word;
+    hyphens: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   
   .category-btn:hover {
     background: var(--accent-blue);
     transform: translateY(-2px);
+  }
+
+  /* Fix textarea appearance and prevent duplication */
+  textarea {
+    resize: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  /* Ensure proper text input styling */
+  .relative textarea {
+    position: relative;
+    z-index: 1;
   }
   
   .scrollbar-hide {

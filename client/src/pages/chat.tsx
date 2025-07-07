@@ -61,7 +61,7 @@ export default function ChatPage() {
                   }`}
                 />
                 <span className="text-xs text-gray-300">
-                  {apiStatus?.status === 'connected' ? 'GPT Connected' : 'Offline'}
+                  {apiStatus?.status === 'connected' ? 'Groq Connected' : 'Offline'}
                 </span>
               </div>
             </div>

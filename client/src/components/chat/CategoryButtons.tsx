@@ -35,15 +35,16 @@ export default function CategoryButtons({ onCategorySelect, onClearContext }: Ca
         </Button>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         {categories.map((category) => (
           <Button
             key={category.id}
             onClick={() => onCategorySelect(category.id)}
-            className="category-btn text-gray-200 hover:text-white px-4 py-2 h-auto text-sm transition-all duration-300 hover:-translate-y-1"
+            className="category-btn text-gray-200 hover:text-white px-3 py-2 h-auto text-xs min-h-[36px] transition-all duration-300 hover:-translate-y-1 whitespace-nowrap overflow-hidden text-ellipsis flex items-center justify-center"
             variant="secondary"
+            title={category.label}
           >
-            {category.label}
+            <span className="truncate">{category.label}</span>
           </Button>
         ))}
       </div>
